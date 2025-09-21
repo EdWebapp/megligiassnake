@@ -1,18 +1,28 @@
 body {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
+    padding: 10px 0;
     background-color: #121212;
     color: #fff;
     font-family: 'Courier New', Courier, monospace;
-    overflow: hidden; /* Impede o scroll da página no mobile */
+    overflow: hidden;
+}
+
+/* Regra para o container principal que torna o jogo responsivo */
+#main-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95vw; /* Ocupa 95% da largura da tela */
+    max-width: 600px; /* Mas não passa de 600px em telas grandes */
 }
 
 h1 {
     color: #4CAF50;
+    text-align: center;
 }
 
 #score {
@@ -20,17 +30,20 @@ h1 {
     margin-bottom: 15px;
 }
 
+/* Regra que faz o canvas se ajustar ao container */
 canvas {
+    width: 100%; /* O canvas agora ocupa 100% do seu container */
+    height: auto; /* A altura se ajusta para manter a proporção */
     background-color: #000;
     border: 4px solid #4CAF50;
     border-radius: 8px;
-    /* Melhora a experiência de toque no celular */
     user-select: none; 
     -webkit-tap-highlight-color: transparent;
 }
 
 #game-container {
     position: relative;
+    width: 100%;
 }
 
 #start-screen {
@@ -69,5 +82,3 @@ canvas {
 #start-btn:hover {
     background-color: #45a049;
 }
-
-/* AS REGRAS DE ESTILO PARA OS BOTÕES FORAM REMOVIDAS DAQUI */
