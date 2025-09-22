@@ -27,23 +27,26 @@ let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
 // --- FUNÇÕES DE SOM ---
 function playSound(sound) {
     sound.currentTime = 0;
-    sound.play().catch(error => console.log("Erro ao tocar som:", error)); // Adicionado para depuração
+    sound.play().catch(error => console.log("Erro ao tocar som:", error));
 }
 
 // --- FUNÇÕES DO JOGO ---
+
 function loadHighScore() {
     const savedHighScore = localStorage.getItem('snakeHighScore');
     if (savedHighScore) {
         highScore = parseInt(savedHighScore);
     }
-    highScoreElement.innerText = `Recorde: ${highScore}`;
+    // ALTERADO
+    highScoreElement.innerText = `Maximo de megs: ${highScore}`;
 }
 
 function saveHighScore() {
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('snakeHighScore', highScore);
-        highScoreElement.innerText = `Recorde: ${highScore}`;
+        // ALTERADO
+        highScoreElement.innerText = `Maximo de megs: ${highScore}`;
     }
 }
 
@@ -54,7 +57,8 @@ function resetGame() {
     score = 0;
     gameOver = false;
     gameStarted = true;
-    scoreElement.innerText = "Pontuação: 0";
+    // ALTERADO
+    scoreElement.innerText = "Megs: 0";
     generateFood();
 }
 
@@ -114,7 +118,8 @@ function update() {
     if (head.x === food.x && head.y === food.y) {
         playSound(eatSound);
         score++;
-        scoreElement.innerText = "Pontuação: " + score;
+        // ALTERADO
+        scoreElement.innerText = "Megs: " + score;
         generateFood();
     } else {
         snake.pop();
@@ -163,26 +168,28 @@ function handleSwipe() {
     const diffX = touchEndX - touchStartX;
     const diffY = touchEndY - touchStartY;
     const threshold = 50;
-
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > threshold && velocity.y !== 0) { // Horizontal swipe
-            velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
-        }
-    } else {
-        if (Math.abs(diffY) > threshold && velocity.x !== 0) { // Vertical swipe
-            velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
-        }
-    }
-     // Lógica para o primeiro movimento
+    
+    // Lógica para o primeiro movimento
     if (velocity.x === 0 && velocity.y === 0 && (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold)) {
         if (Math.abs(diffX) > Math.abs(diffY)) {
             velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
         } else {
             velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
         }
+        return; // Retorna após o primeiro movimento
+    }
+
+    // Lógica para movimentos subsequentes, prevenindo a inversão
+    if (Math.abs(diffX) > Math.abs(diffY)) { // Swipe Horizontal
+        if (Math.abs(diffX) > threshold && velocity.y !== 0) {
+            velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
+        }
+    } else { // Swipe Vertical
+        if (Math.abs(diffY) > threshold && velocity.x !== 0) {
+            velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
+        }
     }
 }
-
 
 // --- INICIALIZAÇÃO DO JOGO ---
 function loadAssets() {
@@ -197,13 +204,10 @@ function loadAssets() {
         asset.img.src = asset.src;
         asset.img.onload = () => {
             assetsLoaded++;
-            console.log(`Imagem carregada: ${asset.src} (${assetsLoaded}/${assets.length})`);
             if (assetsLoaded === assets.length) {
-                console.log("Todas as imagens carregadas! Habilitando o menu.");
                 modeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const selectedMode = button.dataset.mode;
-                        console.log(`Modo de jogo selecionado: ${selectedMode}`);
                         startGame(selectedMode);
                     });
                 });
@@ -214,12 +218,12 @@ function loadAssets() {
             }
         };
         asset.img.onerror = () => {
-            console.error(`ERRO CRÍTICO: Não foi possível carregar a imagem: ${asset.src}`);
             alert(`ERRO CRÍTICO: Não foi possível carregar a imagem: ${asset.src}. Verifique o nome do arquivo (maiúsculas/minúsculas) e a localização.`);
         };
     });
 }
 
 loadAssets();
+
 
 
