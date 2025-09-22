@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MegLigiasSnake</title>
+    <title>MegLigiaSnake</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="main-wrapper">
-        <h1>MegLigiasSnake</h1>
+        <h1>MegLigiaSnake</h1>
         <div id="score">Pontuação: 0</div>
-
-        <div id="game-container">
+        <div id="high-score">Megs: 0</div> <div id="game-container">
             <canvas id="gameCanvas" width="600" height="600"></canvas>
             
             <div id="start-screen">
                 <h2 id="screen-title">Bem-vindo!</h2>
-                <button id="start-btn">Iniciar Jogo</button>
+                <div id="menu-buttons">
+                    <button class="mode-btn" data-mode="classic">Modo Clássico</button>
+                    <button class="mode-btn" data-mode="noWalls">Modo Sem Paredes</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <audio id="eat-sound" src="eat.mp3" preload="auto"></audio>
+    <audio id="gameover-sound" src="gameover.mp3" preload="auto"></audio>
+
     <script src="script.js"></script>
 </body>
 </html>
-
