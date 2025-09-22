@@ -2,14 +2,14 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
-const highScoreElement = document.getElementById('high-score'); // Novo
+const highScoreElement = document.getElementById('high-score');
 const startScreen = document.getElementById('start-screen');
 const screenTitle = document.getElementById('screen-title');
-const modeButtons = document.querySelectorAll('.mode-btn'); // Novo
+const modeButtons = document.querySelectorAll('.mode-btn');
 
 // --- EFEITOS SONOROS ---
-const eatSound = document.getElementById('eat-sound'); // Novo
-const gameOverSound = document.getElementById('gameover-sound'); // Novo
+const eatSound = document.getElementById('eat-sound');
+const gameOverSound = document.getElementById('gameover-sound');
 
 // --- CONFIGURAÇÕES E VARIÁVEIS DO JOGO ---
 const gridSize = 40;
@@ -154,14 +154,24 @@ function setupControls() {
     canvas.addEventListener('touchend', e => { e.preventDefault(); touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, { passive: false });
 }
 
+// --- FUNÇÃO CORRIGIDA ---
 function handleSwipe() {
     if (!gameStarted) return;
     const diffX = touchEndX - touchStartX;
     const diffY = touchEndY - touchStartY;
+    const threshold = 50;
+
+    // Movimento horizontal: só se move se a cobra estiver se movendo na vertical
     if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > 50) velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
-    } else {
-        if (Math.abs(diffY) > 50) velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
+        if (Math.abs(diffX) > threshold && velocity.y !== 0) {
+            velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
+        }
+    } 
+    // Movimento vertical: só se move se a cobra estiver se movendo na horizontal
+    else {
+        if (Math.abs(diffY) > threshold && velocity.x !== 0) {
+            velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
+        }
     }
 }
 
@@ -174,6 +184,11 @@ function loadAssets() {
     ];
     let assetsLoaded = 0;
     
+    // Nenhuma imagem é declarada aqui, então precisamos declará-las antes
+    const snakeHeadImg = new Image();
+    const snakeBodyImg = new Image();
+    const foodImg = new Image();
+
     assets.forEach(asset => {
         asset.img.src = asset.src;
         asset.img.onload = () => {
@@ -195,4 +210,4 @@ function loadAssets() {
 }
 
 loadAssets();
-   
+
