@@ -11,7 +11,7 @@ const modeButtons = document.querySelectorAll('.mode-btn');
 const eatSound = document.getElementById('eat-sound');
 const gameOverSound = document.getElementById('gameover-sound');
 
-// --- CARREGAMENTO DE IMAGENS (LUGAR CORRETO) ---
+// --- CARREGAMENTO DE IMAGENS ---
 const snakeHeadImg = new Image();
 const snakeBodyImg = new Image();
 const foodImg = new Image();
@@ -27,11 +27,10 @@ let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
 // --- FUNÇÕES DE SOM ---
 function playSound(sound) {
     sound.currentTime = 0;
-    sound.play();
+    sound.play().catch(error => console.log("Erro ao tocar som:", error)); // Adicionado para depuração
 }
 
 // --- FUNÇÕES DO JOGO ---
-
 function loadHighScore() {
     const savedHighScore = localStorage.getItem('snakeHighScore');
     if (savedHighScore) {
@@ -86,7 +85,8 @@ function showEndScreen() {
 }
 
 function update() {
-    if (!gameStarted || velocity.x === 0 && velocity.y === 0) return; // Não atualiza se o jogo não começou ou a cobra está parada
+    if (!gameStarted) return;
+    if (velocity.x === 0 && velocity.y === 0) return;
 
     let head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
@@ -124,7 +124,7 @@ function update() {
 function draw() {
     ctx.fillStyle = '#2c3e50';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (!snake) return; // Garante que a cobra exista antes de desenhar
+    if (!snake) return;
     for (let i = 0; i < snake.length; i++) {
         const segment = snake[i];
         const img = (i === 0) ? snakeHeadImg : snakeBodyImg;
@@ -164,27 +164,25 @@ function handleSwipe() {
     const diffY = touchEndY - touchStartY;
     const threshold = 50;
 
-    if (velocity.x === 0 && velocity.y === 0) { // Primeiro movimento
-        if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
-            } else {
-                velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
-            }
-        }
-        return;
-    }
-
     if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > threshold && velocity.y !== 0) {
+        if (Math.abs(diffX) > threshold && velocity.y !== 0) { // Horizontal swipe
             velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
         }
     } else {
-        if (Math.abs(diffY) > threshold && velocity.x !== 0) {
+        if (Math.abs(diffY) > threshold && velocity.x !== 0) { // Vertical swipe
+            velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
+        }
+    }
+     // Lógica para o primeiro movimento
+    if (velocity.x === 0 && velocity.y === 0 && (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold)) {
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
+        } else {
             velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
         }
     }
 }
+
 
 // --- INICIALIZAÇÃO DO JOGO ---
 function loadAssets() {
@@ -199,22 +197,29 @@ function loadAssets() {
         asset.img.src = asset.src;
         asset.img.onload = () => {
             assetsLoaded++;
+            console.log(`Imagem carregada: ${asset.src} (${assetsLoaded}/${assets.length})`);
             if (assetsLoaded === assets.length) {
+                console.log("Todas as imagens carregadas! Habilitando o menu.");
                 modeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const selectedMode = button.dataset.mode;
+                        console.log(`Modo de jogo selecionado: ${selectedMode}`);
                         startGame(selectedMode);
                     });
                 });
                 setupControls();
                 loadHighScore();
-                resetGame(); // Prepara o jogo para o estado inicial
-                draw(); // Desenha o estado inicial
+                resetGame();
+                draw();
             }
         };
-        asset.img.onerror = () => { alert('Erro ao carregar uma das imagens! Verifique os nomes dos arquivos.'); };
+        asset.img.onerror = () => {
+            console.error(`ERRO CRÍTICO: Não foi possível carregar a imagem: ${asset.src}`);
+            alert(`ERRO CRÍTICO: Não foi possível carregar a imagem: ${asset.src}. Verifique o nome do arquivo (maiúsculas/minúsculas) e a localização.`);
+        };
     });
 }
 
 loadAssets();
+
 
