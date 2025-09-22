@@ -11,6 +11,11 @@ const modeButtons = document.querySelectorAll('.mode-btn');
 const eatSound = document.getElementById('eat-sound');
 const gameOverSound = document.getElementById('gameover-sound');
 
+// --- CARREGAMENTO DE IMAGENS (LUGAR CORRETO) ---
+const snakeHeadImg = new Image();
+const snakeBodyImg = new Image();
+const foodImg = new Image();
+
 // --- CONFIGURAÇÕES E VARIÁVEIS DO JOGO ---
 const gridSize = 40;
 const tileCount = canvas.width / gridSize;
@@ -19,7 +24,7 @@ let snake, food, velocity, score, highScore = 0, gameOver, gameInterval, gameSta
 // --- VARIÁVEIS PARA CONTROLE DE GESTOS ---
 let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
 
-// --- FUNÇÕES DE SOM (para garantir que o som toque do início) ---
+// --- FUNÇÕES DE SOM ---
 function playSound(sound) {
     sound.currentTime = 0;
     sound.play();
@@ -81,22 +86,22 @@ function showEndScreen() {
 }
 
 function update() {
+    if (!gameStarted || velocity.x === 0 && velocity.y === 0) return; // Não atualiza se o jogo não começou ou a cobra está parada
+
     let head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
-    // --- LÓGICA DE MODOS DE JOGO ---
-    if (gameMode === 'noWalls') { // Modo Sem Paredes
+    if (gameMode === 'noWalls') {
         if (head.x < 0) head.x = tileCount - 1;
         if (head.x >= tileCount) head.x = 0;
         if (head.y < 0) head.y = tileCount - 1;
         if (head.y >= tileCount) head.y = 0;
-    } else { // Modo Clássico (padrão)
+    } else {
         if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
             gameOver = true;
             return;
         }
     }
 
-    // Colisão com o próprio corpo (igual para ambos os modos)
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
             gameOver = true;
@@ -106,7 +111,6 @@ function update() {
 
     snake.unshift(head);
 
-    // Colisão com a comida
     if (head.x === food.x && head.y === food.y) {
         playSound(eatSound);
         score++;
@@ -120,6 +124,7 @@ function update() {
 function draw() {
     ctx.fillStyle = '#2c3e50';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!snake) return; // Garante que a cobra exista antes de desenhar
     for (let i = 0; i < snake.length; i++) {
         const segment = snake[i];
         const img = (i === 0) ? snakeHeadImg : snakeBodyImg;
@@ -138,7 +143,6 @@ function generateFood() {
     }
 }
 
-// --- CONTROLES (Teclado e Gestos) ---
 function setupControls() {
     document.addEventListener('keydown', e => {
         if (!gameStarted) return;
@@ -154,21 +158,28 @@ function setupControls() {
     canvas.addEventListener('touchend', e => { e.preventDefault(); touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, { passive: false });
 }
 
-// --- FUNÇÃO CORRIGIDA ---
 function handleSwipe() {
     if (!gameStarted) return;
     const diffX = touchEndX - touchStartX;
     const diffY = touchEndY - touchStartY;
     const threshold = 50;
 
-    // Movimento horizontal: só se move se a cobra estiver se movendo na vertical
+    if (velocity.x === 0 && velocity.y === 0) { // Primeiro movimento
+        if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
+            } else {
+                velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
+            }
+        }
+        return;
+    }
+
     if (Math.abs(diffX) > Math.abs(diffY)) {
         if (Math.abs(diffX) > threshold && velocity.y !== 0) {
             velocity = { x: diffX > 0 ? 1 : -1, y: 0 };
         }
-    } 
-    // Movimento vertical: só se move se a cobra estiver se movendo na horizontal
-    else {
+    } else {
         if (Math.abs(diffY) > threshold && velocity.x !== 0) {
             velocity = { x: 0, y: diffY > 0 ? 1 : -1 };
         }
@@ -183,18 +194,12 @@ function loadAssets() {
         { img: foodImg, src: 'IMG_0032.jpeg' }
     ];
     let assetsLoaded = 0;
-    
-    // Nenhuma imagem é declarada aqui, então precisamos declará-las antes
-    const snakeHeadImg = new Image();
-    const snakeBodyImg = new Image();
-    const foodImg = new Image();
 
     assets.forEach(asset => {
         asset.img.src = asset.src;
         asset.img.onload = () => {
             assetsLoaded++;
             if (assetsLoaded === assets.length) {
-                // Habilita os botões do menu quando as imagens carregam
                 modeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const selectedMode = button.dataset.mode;
@@ -203,9 +208,11 @@ function loadAssets() {
                 });
                 setupControls();
                 loadHighScore();
+                resetGame(); // Prepara o jogo para o estado inicial
+                draw(); // Desenha o estado inicial
             }
         };
-        asset.img.onerror = () => { alert('Erro ao carregar imagens!'); };
+        asset.img.onerror = () => { alert('Erro ao carregar uma das imagens! Verifique os nomes dos arquivos.'); };
     });
 }
 
