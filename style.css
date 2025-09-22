@@ -1,26 +1,24 @@
 body {
     display: flex;
-    justify-content: flex-start; /* ALTERADO: Alinha o conteúdo no topo */
-    flex-direction: column;      /* Adicionado para garantir o alinhamento em coluna */
-    align-items: center;         /* Mantém o alinhamento central horizontal */
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 0;                  /* REMOVIDO o padding vertical para mais espaço */
+    padding: 0;
     background-color: #121212;
     color: #fff;
     font-family: 'Courier New', Courier, monospace;
-    /* overflow: hidden; foi removido para permitir rolagem caso a tela seja muito baixa */
 }
 
-/* Regra para o container principal que torna o jogo responsivo */
 #main-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 95vw; /* Ocupa 95% da largura da tela */
-    max-width: 600px; /* Mas não passa de 600px em telas grandes */
-    margin-top: 20px; /* Adiciona um espaço no topo da página */
-    margin-bottom: 20px; /* Adiciona um espaço embaixo */
+    width: 95vw;
+    max-width: 600px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 h1 {
@@ -28,15 +26,14 @@ h1 {
     text-align: center;
 }
 
-#score {
-    font-size: 1.5em;
-    margin-bottom: 15px;
+#score, #high-score { /* Estilo aplicado aos dois placares */
+    font-size: 1.2em; /* Diminuí um pouco para caber melhor */
+    margin-bottom: 10px;
 }
 
-/* Regra que faz o canvas se ajustar ao container */
 canvas {
-    width: 100%; /* O canvas agora ocupa 100% do seu container */
-    height: auto; /* A altura se ajusta para manter a proporção */
+    width: 100%;
+    height: auto;
     background-color: #000;
     border: 4px solid #4CAF50;
     border-radius: 8px;
@@ -67,12 +64,22 @@ canvas {
 
 #screen-title {
     font-size: 2em;
-    margin-bottom: 20px;
+    margin-bottom: 25px; /* Aumentei a margem */
     color: #4CAF50;
 }
 
-#start-btn {
-    padding: 15px 30px;
+/* NOVO: Estilo para o container dos botões do menu */
+#menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre os botões */
+    width: 80%;
+    max-width: 300px;
+}
+
+/* Estilo aplicado aos novos botões de modo */
+.mode-btn {
+    padding: 15px 20px;
     font-size: 1.2em;
     background-color: #4CAF50;
     color: white;
@@ -80,8 +87,10 @@ canvas {
     border-radius: 10px;
     cursor: pointer;
     font-family: 'Courier New', Courier, monospace;
+    transition: background-color 0.3s; /* Adiciona uma transição suave */
 }
 
-#start-btn:hover {
+.mode-btn:hover {
     background-color: #45a049;
 }
+
